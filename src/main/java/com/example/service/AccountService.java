@@ -33,4 +33,7 @@ public class AccountService {
     }
     return Optional.empty();
   }
+  public Optional<Account> findByAccountId(Integer accountId) {
+    return accountRepository.findById(accountId);
+  }
 }
