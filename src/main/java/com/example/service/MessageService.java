@@ -1,5 +1,6 @@
 package com.example.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +23,9 @@ public class MessageService {
   }
 
   public Optional<Message> createdMessage(Message message) {
-    System.out.println("MessageService: " + message);
-    if (message.getMessageText().isEmpty()) {
+    System.out.println("Message: " + message);
+    if (message.getMessageText().isBlank()) {
+
       return Optional.empty();
     }
     if (message.getMessageText().length() > 255) {
@@ -36,4 +38,17 @@ public class MessageService {
     }
     return Optional.of(messageRepository.save(message));
   }
+
+  public List<Message> getMessages() {
+    return messageRepository.findAll();
+  }
+
+  public Optional<Message> getMessageById(Integer messageId) {
+    return messageRepository.findByMessageId(messageId);
+  }
+
+  public List<Message> getMessagesByAccountId(Integer accountId) {
+    return messageRepository.findByPostedBy(accountId);
+  }
+
 }
