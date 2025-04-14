@@ -26,6 +26,8 @@ public class AccountService {
     }
     return Optional.of(accountRepository.save(account));
   }
+
+  
   public Optional<Account> login(Account account) {
     Optional<Account> foundAccount = accountRepository.findByUsername(account.getUsername());
     if (foundAccount.isPresent() && foundAccount.get().getPassword().equals(account.getPassword())) {

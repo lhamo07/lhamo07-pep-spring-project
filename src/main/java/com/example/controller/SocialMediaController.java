@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,11 +35,10 @@ public class SocialMediaController {
   AccountService accountService;
   @Autowired
   MessageService messageService;
-
+  // 1. API should be able to process new User registrations.
   @PostMapping("/register")
   public ResponseEntity<Account> register(@RequestBody Account account) {
     Optional<Account> registered = accountService.register(account);
-    System.out.println("Registered: " + registered);
     if (!registered.isPresent()) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
 
@@ -50,11 +50,10 @@ public class SocialMediaController {
     return ResponseEntity.ok(registered.get());
 
   }
-
+  // 2. API should be able to process User logins.
   @PostMapping("/login")
   public ResponseEntity<Account> login(@RequestBody Account account) {
     Optional<Account> loggedIn = accountService.login(account);
-    System.out.println("logged  in: " + loggedIn);
 
     if (!loggedIn.isPresent()) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -62,7 +61,7 @@ public class SocialMediaController {
 
     return ResponseEntity.ok(loggedIn.get());
   }
-
+  // 3. API should be able to process the creation of new messages.
   @PostMapping("/messages")
   public ResponseEntity<Message> createMessage(@RequestBody Message message) {
     Optional<Message> createdMessage = messageService.createdMessage(message);
@@ -73,14 +72,14 @@ public class SocialMediaController {
 
     return ResponseEntity.ok(createdMessage.get());
   }
-
+  // 4.retrieve all messages.
   @GetMapping("/messages")
   public ResponseEntity<List<Message>> getMessages() {
     List<Message> messages = messageService.getMessages();
     return ResponseEntity.ok(messages);
 
   }
-
+  // 5. retrieve a message by its ID.
   @GetMapping("messages/{messageId}")
   public ResponseEntity<Message> getMessageById(@PathVariable Integer messageId) {
     Optional<Message> message = messageService.getMessageById(messageId);
@@ -90,7 +89,33 @@ public class SocialMediaController {
       return null;
     }
   }
+    // 6:  delete a message identified by a message ID.
+    @DeleteMapping("/messages/{messageId}")
+    public ResponseEntity<?> deleteMessage(@PathVariable Integer messageId) {
+      boolean deleted = messageService.deleteMessageById(messageId);
+  
+      if (deleted) {
+     
+        return ResponseEntity.ok(1);
+      } else {
+       
+        return ResponseEntity.ok().build();
+      }
+    }
+    // 7:  update a message text identified by a message ID.
+  @PatchMapping("/messages/{messageId}")
+  public ResponseEntity<?> updateMessage(
+      @PathVariable Integer messageId,
+      @RequestBody Message updatedMessage) {
+    Optional<Integer> updatedRows = messageService.updateMessage(messageId, updatedMessage);
 
+    if (updatedRows.isPresent()) {
+      return ResponseEntity.ok(updatedRows.get());
+    } else {
+      return ResponseEntity.status(400).build();
+    }
+  }
+// 8.  retrieve all messages written by a particular user.
   @GetMapping("/accounts/{accountId}/messages")
   public ResponseEntity<List<Message>> getMessagesByAccountId(@PathVariable Integer accountId) {
     List<Message> messages = messageService.getMessagesByAccountId(accountId);

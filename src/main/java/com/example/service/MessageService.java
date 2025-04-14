@@ -19,7 +19,6 @@ public class MessageService {
   public MessageService(MessageRepository messageRepository, AccountService accountService) {
     this.accountService = accountService;
     this.messageRepository = messageRepository;
-
   }
 
   public Optional<Message> createdMessage(Message message) {
@@ -31,22 +30,56 @@ public class MessageService {
     if (message.getMessageText().length() > 255) {
       return Optional.empty();
     }
-    // Validate postedBy refers to a real user
     Optional<Account> user = accountService.findByAccountId(message.getPostedBy());
     if (!user.isPresent()) {
-      return Optional.empty(); // User doesn't exist
+      return Optional.empty(); 
     }
     return Optional.of(messageRepository.save(message));
   }
+
 
   public List<Message> getMessages() {
     return messageRepository.findAll();
   }
 
+  public boolean deleteMessageById(Integer messageId) {
+    Optional<Message> message = messageRepository.findByMessageId(messageId);
+    if (message.isPresent()) {
+      messageRepository.deleteById(messageId);
+      return true;
+    }
+    return false;
+  }
+
+
+  public Optional<Integer> updateMessage(Integer messageId, Message message) {
+    Optional<Message> existingMessage = messageRepository.findById(messageId);
+    System.out.println("Existing message: " + existingMessage);
+    if (existingMessage.isEmpty()) {
+      return Optional.empty();
+    }
+
+    String messageText = message.getMessageText();
+    System.out.println("Message text: " + messageText);
+    if (messageText == null || messageText.isBlank() || messageText.length() > 255) {
+      return Optional.empty();
+    }
+    System.out.println("existing message" + existingMessage.get());
+    Message messageToUpdate = existingMessage.get();
+    messageToUpdate.setMessageText(messageText);
+
+    messageRepository.save(messageToUpdate);
+    System.out.println("Updated message: " + messageToUpdate);
+
+    return Optional.of(1); 
+  }
+
+
   public Optional<Message> getMessageById(Integer messageId) {
     return messageRepository.findByMessageId(messageId);
   }
 
+  
   public List<Message> getMessagesByAccountId(Integer accountId) {
     return messageRepository.findByPostedBy(accountId);
   }
